@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== GLOBAL STYLES ===== */
+    body {
+      box-sizing: border-box;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .message-animation {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .online-dot {
+      animation: pulse 2s infinite;
+    }
+
+    /* ===== INTERACTIVE EFFECTS ===== */
+    .hover-lift:hover {
+      transform: translateY(-1px);
+      transition: transform 0.2s ease;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .scroll-smooth {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+<!-- ===== MAIN CONTAINER ===== -->
+<div class="flex h-screen max-w-6xl mx-auto bg-white shadow-2xl">
+
+  <!-- ===== SIDEBAR COMPONENT ===== -->
+  <div class="w-80 bg-gradient-to-b from-indigo-600 to-purple-700 text-white flex flex-col">
+
+    <!-- Sidebar Header -->
+    <div class="p-6 border-b border-indigo-500">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+          <span class="text-indigo-600 font-bold text-lg">💬</span>
+        </div>
+        <div>
+          <h1 class="font-bold text-xl">ChatApp</h1>
+          <p class="text-indigo-200 text-sm">Kết nối mọi lúc</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Component -->
+    <div class="p-4">
+      <div class="relative">
+        <input
+                type="text"
+                placeholder="Tìm kiếm cuộc trò chuyện..."
+                class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30"
+        >
+        <span class="absolute right-3 top-2.5 text-white/70">🔍</span>
+      </div>
+    </div>
+
+    <!-- Chat List Component -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="p-2 space-y-1">
+        <!-- Chat Item 1 -->
+        <div class="chat-item bg-white/10 rounded-lg p-3 cursor-pointer hover:bg-white/20 transition-colors" onclick="selectChat('Minh Anh', 'online')">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-red-400 rounded-full flex items-center justify-center font-bold">MA</div>
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white online-dot"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center">
+                <h3 class="font-semibold truncate">Minh Anh</h3>
+                <span class="text-xs text-white/70">2 phút</span>
+              </div>
+              <p class="text-sm text-white/70 truncate">Hôm nay có rảnh không? 😊</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Item 2 -->
+        <div class="chat-item rounded-lg p-3 cursor-pointer hover:bg-white/20 transition-colors" onclick="selectChat('Nhóm Dự Án', 'active')">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center font-bold">👥</div>
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-orange-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">3</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center">
+                <h3 class="font-semibold truncate">Nhóm Dự Án</h3>
+                <span class="text-xs text-white/70">15 phút</span>
+              </div>
+              <p class="text-sm text-white/70 truncate">Tuấn: Đã hoàn thành task...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Item 3 -->
+        <div class="chat-item rounded-lg p-3 cursor-pointer hover:bg-white/20 transition-colors" onclick="selectChat('Lan Hương', 'offline')">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center font-bold">LH</div>
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-400 rounded-full border-2 border-white"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center">
+                <h3 class="font-semibold truncate">Lan Hương</h3>
+                <span class="text-xs text-white/70">1 giờ</span>
+              </div>
+              <p class="text-sm text-white/70 truncate">Cảm ơn bạn nhiều nhé! 💕</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Component -->
+    <div class="p-4 border-t border-indigo-500">
+      <div class="flex items-center space-x-3">
+        <div class="relative">
+          <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center font-bold">BẠN</div>
+          <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-semibold">Bạn</h3>
+          <p class="text-xs text-white/70">Đang hoạt động</p>
+        </div>
+        <button class="text-white/70 hover:text-white transition-colors">⚙️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CHAT AREA COMPONENT ===== -->
+  <div class="flex-1 flex flex-col">
+
+    <!-- Chat Header Component -->
+    <div class="bg-white border-b border-gray-200 p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <div id="current-avatar" class="w-12 h-12 bg-gradient-to-r from-pink-400 to-red-400 rounded-full flex items-center justify-center font-bold text-white">MA</div>
+            <div id="current-status" class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white online-dot"></div>
+          </div>
+          <div>
+            <h2 id="current-name" class="font-bold text-gray-800">Minh Anh</h2>
+            <p id="current-activity" class="text-sm text-green-600">Đang hoạt động</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors hover-lift">📞</button>
+          <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors hover-lift">📹</button>
+          <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors hover-lift">ℹ️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Container Component -->
+    <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth bg-gradient-to-b from-gray-50 to-white">
+      <!-- Sample Messages for UI Display -->
+      <div class="flex justify-start">
+        <div class="max-w-xs lg:max-w-md">
+          <div class="bg-white rounded-2xl rounded-tl-md p-3 shadow-sm border border-gray-100">
+            <p class="text-gray-800">Chào bạn! Hôm nay thế nào? 😊</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-3">10:30</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <div class="max-w-xs lg:max-w-md">
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl rounded-tr-md p-3 shadow-sm">
+            <p>Chào Minh Anh! Mình khỏe, cảm ơn bạn. Bạn có kế hoạch gì hôm nay không?</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 mr-3 text-right">10:32</p>
+        </div>
+      </div>
+
+      <div class="flex justify-start">
+        <div class="max-w-xs lg:max-w-md">
+          <div class="bg-white rounded-2xl rounded-tl-md p-3 shadow-sm border border-gray-100">
+            <p class="text-gray-800">Mình định đi cafe chiều nay, bạn có muốn đi cùng không? ☕</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-3">10:35</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Input Component -->
+    <div class="bg-white border-t border-gray-200 p-4">
+      <form id="message-form" class="flex items-end space-x-3">
+        <button type="button" class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors hover-lift">📎</button>
+        <div class="flex-1 relative">
+                        <textarea
+                                id="message-input"
+                                placeholder="Nhập tin nhắn..."
+                                class="chat-input w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 pr-12 focus:border-indigo-500 transition-colors max-h-32"
+                                rows="1"
+                        ></textarea>
+          <button type="button" class="absolute right-3 top-3 text-gray-500 hover:text-indigo-600 transition-colors">😊</button>
+        </div>
+        <button type="submit" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-3 rounded-full hover:from-indigo-600 hover:to-purple-700 transition-all hover-lift shadow-lg">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== STATE MANAGEMENT =====
+  let currentChat = 'Minh Anh';
+
+  // ===== UI INTERACTIONS =====
+
+  // Auto-resize textarea functionality
+  const messageInput = document.getElementById('message-input');
+  messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 128) + 'px';
+  });
+
+  // Message form submission handler
+  document.getElementById('message-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  // Enter key handler (Shift+Enter for new line)
+  messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ===== CORE FUNCTIONS =====
+
+  function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    // Add message to chat (this would connect to your backend)
+    addMessage(message, true);
+    input.value = '';
+    input.style.height = 'auto';
+  }
+
+  function addMessage(text, isOwn) {
+    const container = document.getElementById('messages-container');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} message-animation`;
+
+    const time = new Date().toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    messageDiv.innerHTML = `
+                <div class="max-w-xs lg:max-w-md">
+                    <div class="${isOwn ?
+            'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl rounded-tr-md' :
+            'bg-white text-gray-800 rounded-2xl rounded-tl-md border border-gray-100'
+    } p-3 shadow-sm">
+                        <p>${text}</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 ${isOwn ? 'mr-3 text-right' : 'ml-3'}">${time}</p>
+                </div>
+            `;
+
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function selectChat(name, status) {
+    // Update active chat item
+    document.querySelectorAll('.chat-item').forEach(item => {
+      item.classList.remove('bg-white/10');
+    });
+    event.currentTarget.classList.add('bg-white/10');
+
+    // Update chat header
+    document.getElementById('current-name').textContent = name;
+
+    // Update avatar and status based on selected chat
+    const avatar = document.getElementById('current-avatar');
+    const statusDot = document.getElementById('current-status');
+    const activity = document.getElementById('current-activity');
+
+    if (name === 'Minh Anh') {
+      avatar.textContent = 'MA';
+      avatar.className = 'w-12 h-12 bg-gradient-to-r from-pink-400 to-red-400 rounded-full flex items-center justify-center font-bold text-white';
+      statusDot.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white online-dot';
+      activity.textContent = 'Đang hoạt động';
+      activity.className = 'text-sm text-green-600';
+    } else if (name === 'Nhóm Dự Án') {
+      avatar.textContent = '👥';
+      avatar.className = 'w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center font-bold text-white';
+      statusDot.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-orange-400 rounded-full border-2 border-white';
+      activity.textContent = '5 thành viên';
+      activity.className = 'text-sm text-blue-600';
+    } else if (name === 'Lan Hương') {
+      avatar.textContent = 'LH';
+      avatar.className = 'w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center font-bold text-white';
+      statusDot.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-gray-400 rounded-full border-2 border-white';
+      activity.textContent = 'Hoạt động 1 giờ trước';
+      activity.className = 'text-sm text-gray-500';
+    }
+
+    currentChat = name;
+  }
+</script>
+</body>
+</html>
