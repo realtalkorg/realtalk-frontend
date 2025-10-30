@@ -1,10 +1,11 @@
-import SidebarHeader from '../components/Sidebar/SidebarHeader.jsx';
-import SearchBox from '../components/Shared/SearchBox.jsx';
-import ConversationList from '../components/Sidebar/ConversationList.jsx';
-import UserProfile from "../components/Sidebar/UserProfile.jsx";
-import ChatHeader from '../components/ChatArea/ChatHeader.jsx';
-import MessageList from '../components/ChatArea/MessageList.jsx';
-import MessageInput from '../components/ChatArea/MessageInput.jsx';
+import SidebarHeader from '../features/chat/components/Sidebar/SidebarHeader.jsx';
+import SearchBox from '../features/chat/components/Shared/SearchBox.jsx';
+import ConversationList from '../features/chat/components/Sidebar/ConversationList.jsx';
+import UserProfile from "../features/chat/components/Sidebar/UserProfile.jsx";
+import ChatHeader from '../features/chat/components/ChatArea/ChatHeader.jsx';
+import MessageList from '../features/chat/components/ChatArea/MessageList.jsx';
+import MessageInput from '../features/chat/components/ChatArea/MessageInput.jsx';
+import './ChatPage.css'
 import {useState} from "react";
 
 const ChatPage = () => {
