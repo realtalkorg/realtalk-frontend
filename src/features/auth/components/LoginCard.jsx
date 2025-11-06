@@ -1,5 +1,182 @@
+import {useNavigate} from "react-router-dom";
+import {useEffect, useState} from "react";
+import {login, loginWithGoogle, loginWithFacebook, loginWithGitHub} from "../../../services/authService";
 
 const LoginCard = () => {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    // Thêm floating label effect
+    useEffect(() => {
+        const inputs = document.querySelectorAll('input');
+
+        const handleFocus = (e) => {
+            e.target.parentElement.classList.add('focused');
+        };
+
+        const handleBlur = (e) => {
+            if (!e.target.value) {
+                e.target.parentElement.classList.remove('focused');
+            }
+        };
+
+        inputs.forEach(input => {
+            input.addEventListener('focus', handleFocus);
+            input.addEventListener('blur', handleBlur);
+        });
+
+        return () => {
+            inputs.forEach(input => {
+                input.removeEventListener('focus', handleFocus);
+                input.removeEventListener('blur', handleBlur);
+            });
+        };
+    }, []);
+
+    // Toast notification function
+    const showMessage = (message, type = 'info') => {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                    'bg-blue-500 text-white'
+        }`;
+        toast.textContent = message;
+        toast.style.transform = 'translateX(100%)';
+        toast.style.opacity = '0';
+
+        document.body.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        }, 100);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    };
+
+    // Xử lý thay đổi input
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            // prev la gia tri cu cua form data
+            ...prev, // copy toan bo gia tri cu
+            [name]: value, // sua doi gia tri can thay doi
+        }));
+        // Clear error khi user bắt đầu nhập
+        if (error) setError('');
+    };
+
+    // Xử lý submit form
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Validate
+        if (!formData.email || !formData.password) {
+            setError('Vui lòng nhập đầy đủ email và mật khẩu');
+            showMessage('Vui lòng điền đầy đủ thông tin', 'error');
+            return;
+        }
+
+        if (!formData.email.includes('@')) {
+            setError('Email không hợp lệ');
+            showMessage('Email không hợp lệ', 'error');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            // console.log('Email login attempt:', {
+            //     email: formData.email,
+            //     password: formData.password
+            // });
+
+            const result = await login(formData.email, formData.password);
+
+            if (result.success) {
+                // Đăng nhập thành công
+                showMessage('Đăng nhập thành công!', 'success');
+
+                // Đợi 500ms để hiển thị toast rồi chuyển trang
+                setTimeout(() => {
+                    navigate('/Real_Talk');
+                }, 500);
+            } else {
+                // Đăng nhập thất bại
+                const errorMessage = result.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
+                setError(errorMessage);
+                showMessage(errorMessage, 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            const errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+            setError(errorMessage);
+            showMessage(errorMessage, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Xử lý OAuth login
+    const handleOAuthLogin = (provider) => {
+        const messages = {
+            'google': 'Đang chuyển hướng đến Google...',
+            'facebook': 'Đang chuyển hướng đến Facebook...',
+            'github': 'Đang chuyển hướng đến GitHub...'
+        };
+
+        showMessage(messages[provider], 'info');
+        console.log(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth2 login initiated`);
+
+        setTimeout(() => {
+            switch(provider) {
+                case 'google':
+                    loginWithGoogle();
+                    break;
+                case 'facebook':
+                    loginWithFacebook();
+                    break;
+                case 'github':
+                    loginWithGitHub();
+                    break;
+                default:
+                    break;
+            }
+        }, 500);
+    };
+
+    // Xử lý navigate to register
+    const handleNavigateToRegister = () => {
+        console.log('Navigating to register page');
+        showMessage('Chuyển đến trang đăng ký...', 'info');
+        setTimeout(() => {
+            navigate('/register');
+        }, 500);
+    };
+
+    // Xử lý toggle password visibility
+    const handleTogglePassword = () => {
+        setShowPassword(!showPassword);
+    };
     return (
         <div className="glass-effect rounded-2xl shadow-2xl p-8 fade-in">
 
@@ -14,7 +191,7 @@ const LoginCard = () => {
             </div>
 
             {/*Login Form*/}
-            <form id="login-form" className="space-y-6 slide-up">
+            <form id="login-form" className="space-y-6 slide-up" onSubmit={handleSubmit}>
 
                 {/*Email Input*/}
                 <div>
@@ -26,11 +203,13 @@ const LoginCard = () => {
                             type="email"
                             id="email"
                             name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
                             placeholder="Nhập email của bạn"
-                            className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-12"
+                            className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-4"
                             required
+                            disabled={loading}
                         />
-                        <span className="absolute left-4 top-3.5 text-gray-400">📧</span>
                     </div>
                 </div>
 
@@ -41,20 +220,24 @@ const LoginCard = () => {
                     </label>
                     <div className="relative">
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             id="password"
                             name="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
                             placeholder="Nhập mật khẩu"
-                            className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-12 pr-12"
+                            className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-4 pr-12"
                             required
+                            disabled={loading}
                         />
-                        <span className="absolute left-4 top-3.5 text-gray-400">🔒</span>
                         <button
                             type="button"
                             id="toggle-password"
+                            onClick={handleTogglePassword}
                             className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            disabled={loading}
                         >
-                            👁️
+                            {showPassword ? '🙈' : '👁️'}
                         </button>
                     </div>
                 </div>
@@ -63,7 +246,10 @@ const LoginCard = () => {
                 <div className="flex items-center justify-between">
                     <label className="flex items-center">
                         <input type="checkbox"
-                               className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"/>
+                               className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                               checked={rememberMe}
+                               onChange={(e) => setRememberMe(e.target.checked)}
+                        />
                         <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
                     </label>
                     <a href="#" className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors">
@@ -74,9 +260,25 @@ const LoginCard = () => {
                 {/*Login Button*/}
                 <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-800 transition-all duration-200 hover-lift shadow-lg"
+                    className={`w-full bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover-lift shadow-lg ${
+                        loading
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:from-indigo-700 hover:to-purple-800'
+                    }`}
+                    disabled={loading}
+
                 >
-                    Đăng nhập
+                    {loading ? (
+                        <span className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Đang đăng nhập...
+                        </span>
+                    ) : (
+                        'Đăng nhập'
+                    )}
                 </button>
             </form>
 
@@ -97,7 +299,8 @@ const LoginCard = () => {
                 {/*Google OAuth*/}
                 <button
                     type="button"
-                    onClick="loginWithGoogle()"
+                    onClick={() => handleOAuthLogin('google')}
+                    disabled={loading}
                     className="oauth-button w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-all duration-200"
                 >
                     <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -116,7 +319,8 @@ const LoginCard = () => {
                 {/*Facebook OAuth*/}
                 <button
                     type="button"
-                    onClick="loginWithFacebook()"
+                    onClick={() => handleOAuthLogin('facebook')}
+                    disabled={loading}
                     className="oauth-button w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-all duration-200"
                 >
                     <svg className="w-5 h-5 mr-3" fill="#1877F2" viewBox="0 0 24 24">
@@ -129,7 +333,8 @@ const LoginCard = () => {
                 {/*GitHub OAuth*/}
                 <button
                     type="button"
-                    onClick="loginWithGitHub()"
+                    onClick={() => handleOAuthLogin('github')}
+                    disabled={loading}
                     className="oauth-button w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-all duration-200"
                 >
                     <svg className="w-5 h-5 mr-3" fill="#333" viewBox="0 0 24 24">
@@ -146,7 +351,8 @@ const LoginCard = () => {
                     Chưa có tài khoản?
                     <button
                         type="button"
-                        onClick="navigateToRegister()"
+                        onClick={handleNavigateToRegister}
+                        disabled={loading}
                         className="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
                     >
                         Đăng ký ngay
