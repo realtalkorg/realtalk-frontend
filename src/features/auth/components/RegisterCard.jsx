@@ -1,11 +1,12 @@
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {login, loginWithGoogle, loginWithFacebook, loginWithGitHub} from "../../../services/authService";
+import {loginWithGoogle, loginWithFacebook, loginWithGitHub, register} from "../../../services/authService";
 
 const LoginCard = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
+        name: '',
         password: '',
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -89,8 +90,8 @@ const LoginCard = () => {
         e.preventDefault();
 
         // Validate
-        if (!formData.email || !formData.password) {
-            setError('Vui lòng nhập đầy đủ email và mật khẩu');
+        if (!formData.email || !formData.password || !formData.name) {
+            setError('Vui lòng nhập đầy đủ email, name và mật khẩu');
             showMessage('Vui lòng điền đầy đủ thông tin', 'error');
             return;
         }
@@ -110,29 +111,27 @@ const LoginCard = () => {
             //     password: formData.password
             // });
 
-            const result = await login(formData.email, formData.password);
+            const result = await register(formData.email,formData.name, formData.password);
 
             if (result.success) {
                 // Đăng nhập thành công
-                showMessage('Đăng nhập thành công!', 'success');
+                showMessage('Đăng ký thành công!', 'success');
 
                 // Đợi 500ms để hiển thị toast rồi chuyển trang
                 setTimeout(() => {
-                    navigate('/Real_Talk');
+                    navigate('/login');
                 }, 500);
             } else {
                 // Đăng nhập thất bại
-                const errorMessage = result.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
-                showMessage(errorMessage, 'error');
-                setTimeout(500);
+                const errorMessage = result.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
                 setError(errorMessage);
+                showMessage(errorMessage, 'error');
             }
         } catch (error) {
+            console.error('Register error:', error);
             const errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
-            showMessage(errorMessage, 'error');
-            setTimeout(500);
-            console.error('Login error:', error);
             setError(errorMessage);
+            showMessage(errorMessage, 'error');
         } finally {
             setLoading(false);
         }
@@ -169,9 +168,9 @@ const LoginCard = () => {
     // Xử lý navigate to register
     const handleNavigateToRegister = () => {
         console.log('Navigating to register page');
-        showMessage('Chuyển đến trang đăng ký...', 'info');
+        showMessage('Chuyển đến trang đăng nhập...', 'info');
         setTimeout(() => {
-            navigate('/register');
+            navigate('/login');
         }, 500);
     };
 
@@ -188,8 +187,8 @@ const LoginCard = () => {
                     className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold text-2xl">💬</span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Chào mừng trở lại!</h1>
-                <p className="text-gray-600">Đăng nhập để tiếp tục trò chuyện</p>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">RealTalk</h1>
+                <p className="text-gray-600">Đăng ký để tiếp tục trò chuyện</p>
             </div>
 
             {/*Login Form*/}
@@ -208,6 +207,26 @@ const LoginCard = () => {
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="Nhập email của bạn"
+                            className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-4"
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+                </div>
+
+                {/*name input*/}
+                <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Name
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="name"
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="Nhập name của bạn"
                             className="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl transition-all duration-200 pl-4"
                             required
                             disabled={loading}
@@ -252,11 +271,8 @@ const LoginCard = () => {
                                checked={rememberMe}
                                onChange={(e) => setRememberMe(e.target.checked)}
                         />
-                        <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
+                        <span className="ml-2 text-sm text-gray-600">Ghi nhớ thông tin</span>
                     </label>
-                    <a href="#" className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors">
-                        Quên mật khẩu?
-                    </a>
                 </div>
 
                 {/*Login Button*/}
@@ -276,10 +292,10 @@ const LoginCard = () => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Đang đăng nhập...
+                            Đang chuyển sang trang đăng nhập...
                         </span>
                     ) : (
-                        'Đăng nhập'
+                        'Đăng ký'
                     )}
                 </button>
             </form>
@@ -291,7 +307,7 @@ const LoginCard = () => {
                         <div className="w-full border-t border-gray-300"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-4 bg-white text-gray-500">Hoặc đăng nhập với</span>
+                        <span className="px-4 bg-white text-gray-500">Hoặc đăng ký với</span>
                     </div>
                 </div>
             </div>
@@ -350,14 +366,14 @@ const LoginCard = () => {
             {/*Register Link Component*/}
             <div className="mt-8 text-center">
                 <p className="text-gray-600">
-                    Chưa có tài khoản?
+                    Đã có tài khoản?
                     <button
                         type="button"
                         onClick={handleNavigateToRegister}
                         disabled={loading}
                         className="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
                     >
-                        Đăng ký ngay
+                        Đăng nhập ngay
                     </button>
                 </p>
             </div>

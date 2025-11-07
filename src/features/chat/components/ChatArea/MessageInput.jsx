@@ -31,6 +31,7 @@ const MessageInput = (props) => {
                                     setMessage("");
                                 }
                             }}
+                            value = {message}
                         ></textarea>
                     <button type="button"
                             className="absolute right-3 top-3 text-gray-500 hover:text-indigo-600 transition-colors">😊

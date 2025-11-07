@@ -34,6 +34,27 @@ const login = async (username, password) => {
     }
 }
 
+const register = async (username, name, password) => {
+    try{
+        // goi api
+        const response = await apiClient.post('auth/register', {
+            email: username,
+            name: name,
+            password: password,
+        });
+        return{
+            success: true,
+            data: response.data
+        }
+    } catch (error){
+        return{
+            success: false,
+            message: error.response?.data?.message || "Email is already exists",
+            error: error
+        }
+    }
+}
+
 const loginWithGoogle = async () => {
 }
 
@@ -47,5 +68,6 @@ export {
     login,
     loginWithGoogle,
     loginWithFacebook,
-    loginWithGitHub
+    loginWithGitHub,
+    register,
 };

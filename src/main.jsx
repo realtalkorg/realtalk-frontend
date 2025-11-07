@@ -8,12 +8,17 @@ import {
     createBrowserRouter,
     RouterProvider,
 } from "react-router-dom"
+import RegisterPage from "./pages/RegisterPage.jsx";
 
 
 const router = createBrowserRouter([
     {
         path: '/login',
         element: <LoginPage/>,
+    },
+    {
+        path: '/register',
+        element: <RegisterPage/>,
     },
     {
         path: '/Real_Talk',
